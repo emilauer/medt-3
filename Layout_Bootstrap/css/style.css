@@ -1,50 +1,70 @@
 
 body {
 	margin: 0;
-	background-color: #000;
+	background-color: #666;
 }
 
 .row {
 	padding: 15px;
 }
 
-.col-md-9 {
+.col-md-12 {
 	padding: 0;
-	margin-bottom: 20px;
-    height: 600px;
+	margin-bottom: 0px;
+    min-height: 600px;
 }
 
-aside.col-md-3 {
+.col-md-4 {
 	padding: 0;
 	margin-bottom: 20px;
-    height: 600px;
-    border-left: 1px solid #000;
+	padding: 10px;
 }
+
+.col-md-4 .text{
+	background-color: #262626;
+	color: #fff;
+	padding: 10px;
+	font-size: 18px;
+}
+
+
 
 .colcontent {
-	background-color: #fff;
-	height: 600px;
-}
-
-div.text {
-	background-color: #ccc;
-	margin: 5px;
+	background-color: #000;
+	min-height: 600px;
 }
 
 footer {
-    background-color: #fff;
+    background-color: #000;
     margin-top: 0px;
+    color: #fff;
+    font-size: 18px;
 }
 
 .page-header {
-	height: 200px;
-	background-color: #fff;
+	min-height: 200px;
+	background-color: #000;
+	padding: 40px;
+	border-bottom: 0px;
+}
+
+.page-header .col-md-1 {
+	padding: 15px;
+	color: #fff;
 }
 
 .navbar {
-	background-color: #fff;
-	border: 0;
-	font-size: 15px;
+	background-color: #000;
+	font-size: 18px;
+    border-radius: 0px;
+    margin-bottom: 0px;
+}
+
+ul.nav {
+}
+
+
+.navbar-collapse {
 }
 
 .navbar li:hover {
@@ -52,16 +72,24 @@ footer {
 }
 
 .navbar li a {
-	color: #000;
+	color: #fff;
 }
 
 .navbar li a:hover {
-	background-color: #999;
+	background-color: #262626;
+}
+
+.navbar li a:focus {
+	background-color: #262626;
 }
 
 .navbar-toggle {
-    background-color: #ccc;
+    background-color: #262626;
     background-image: none;
     border: 1px solid #999;
     border-radius: 4px;
+}
+
+span.icon-bar {
+	background-color: #999;
 }
