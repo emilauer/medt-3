@@ -15,9 +15,11 @@
 		.anmeldekasterl {
 			padding: 10px;
 			width: 100%;
+			min-width: 220px;
 		}
 		.form-control {
 			max-width: 200px;
+			min-width: 200px;
 		}
 		.anmeldeinfo {
 			padding: 10px;
@@ -25,6 +27,8 @@
 		}
 		.panel {
 			max-width: 200px;
+			min-width: 200px;
+			background-color: #d9edf7;
 		}
 		.panel .btn {
 			margin-top: 10px;
@@ -42,7 +46,7 @@
 
 			<h4>Anmeldedaten eingeben</h4>
 
-			<form action="http://localhost/medt/ue5/SimpleForm1.php">
+			<form action="http://localhost/medt-3/ue5/SimpleForm1.php">
 
 		  		<div class="form-group">
 				    <label for="text">Vorname</label>
@@ -73,23 +77,29 @@
 
 	</div>
 
-<!--<div style="clear: both;"></div>-->
-
 	<div class="col-md-3">
 
 		<div class="container anmeldeinfo">
 
-		<div class="panel panel-default">
+		<div class="panel panel-primary">
 		 	<div class="panel-heading">
 				<h3 class="panel-title">Anmeldeinformationen</h3>
 		  	</div>
 		  	<div class="panel-body">
 		    	<?php
-					if(isset($_GET['submitBtn'])) {
-						echo "<p><strong>Vorname</strong>"."<br>".$_GET['vn'];
-						echo "<p><strong>Nachname</strong>"."<br>".$_GET['nn'];
-						echo "<p><strong>Email</strong>"."<br>".$_GET['em'];
-					}	
+	    			echo "<p><strong>Vorname</strong>";
+	    			if (isset($_GET['submitBtn'])) {
+						echo "<br>".$_GET['vn'];
+					}
+					echo "<p><strong>Nachname</strong>";
+	    			if (isset($_GET['submitBtn'])) {
+						echo "<br>".$_GET['nn'];
+					}
+					echo "<p><strong>Email</strong>";
+	    			if (isset($_GET['submitBtn'])) {
+						echo "<br>".$_GET['em'];
+		    		}
+						
 				?>
 		  		<!--<button class="btn btn-primary" type="submit">Bestätigen</button>-->
 		  	</div>
@@ -106,7 +116,4 @@
 
 </body>
 </html>
-
-<!--
-     HÜ: schönes formula mit bootstrap
      
