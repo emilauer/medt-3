@@ -82,7 +82,7 @@
 			echo "<p>Nachname: ".$myGETArray['nn']."</p>";
 			echo "<ul>";
 			foreach ($myGETArray as $item) {
-				echo "<li>$item</li>";
+				echo "<li>".$item."</li>";
 			}
 			echo "</ul>";
 		}
