@@ -1,4 +1,0 @@
-AuthType Basic
-AuthName "Password"
-AuthUserFile c:/xampp/htdocs/medt/ue12/.htpwd
-require valid-user
