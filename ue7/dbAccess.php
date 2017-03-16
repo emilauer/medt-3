@@ -52,8 +52,12 @@
 	if (isset($_GET['delete'])) {
 		$deleteid=$_GET['delete'];
 		$sql = "DELETE FROM project WHERE id=$deleteid";
-		$db->exec($sql);
-		header("Location:".$_SERVER['PHP_SELF']); 
+		try{
+			echo "<div class=\"alert alert-success\" role=\"alert\">Erfolgreich</div>";
+		}
+		catch{
+			echo "<div class=\"alert alert-success\" role=\"alert\">Nicht erfolgreich</div>";
+		}
 	}
 
 
@@ -61,8 +65,8 @@
 		$editid = $_GET['edit'];
 		setcookie("idid",$editid);
 
-		$sql=$db->prepare("SELECT name, description, createDate FROM project WHERE id = $editid");
-		$sql->execute();
+		$sql= "SELECT name, description, createDate FROM project WHERE id = $editid";
+		$db->query($sql);
 		$projectdata=$sql->fetch(\PDO::FETCH_ASSOC);
 	}
 
