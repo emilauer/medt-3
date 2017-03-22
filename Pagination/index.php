@@ -1,222 +1,183 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title></title>
+	<head>
+		<meta charset="utf-8">
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-<!-- Optional theme -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	</head>
 
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<body>
+		<div class = "container">
+		<h2>Kundenübersicht</h2>
+			<?php
 
-<style type="text/css">
-	span {
-		color: #000;
-	}
-</style>
+				$host = 'localhost';
+				$database = 'classicmodels';
+				$user ='htluser';
+				$pwd = 'htluser';
 
-</head>
-<body>
-<?php 
-	$host='localhost';
-	$dbname='classicmodels';
-	$user='htluser';
-	$pwd='htluser';
-	
+				try
+				{
+					$db = new PDO ("mysql:host=$host;dbname=$database", $user, $pwd);
+				}catch(PDOException $e){
+					exit("<h3 class=\"bg-danger\">Nicht verfügbar!</h3>");
+				}
 
-	try{
-		$db=new PDO ( "mysql:host=$host;dbname=$dbname", $user, $pwd);
-	}catch(PDOException $e){
-		exit("<h2 class=\"bg-danger\">System nicht verfügbar!</h2>");
-	}
-	
+				$db->query("SET NAMES 'utf8'");
 
-	//PDOStatement
-	$res = $db->query ("SELECT * FROM customers");
-	//Array
-	$temp = $res->fetchAll(PDO::FETCH_ASSOC);
-	
-
-	/*
-
-	if (isset($_GET['delete'])) {
-		$deleteid=$_GET['delete'];
-		$sql = "DELETE FROM project WHERE id=$deleteid";
-		$res = $db->query($sql);
-		if ($res->rowCount()) {
-			setcookie("deletesuccess",true);
-		}
-		else {
-			setcookie("deletesuccess",false);
-		} 
-		header("Location:".$_SERVER['PHP_SELF']);
-	}
-
-	if (isset($_COOKIE['deletesuccess'])) {
-		if ($_COOKIE['deletesuccess'] == true) {
-			echo '<div class="alert alert-success" role="alert">Löschvorgang erfolgreich!</div>';
-			setcookie("deletesuccess","");
-		}
-		else {
-			echo '<div class="alert alert-success" role="alert">Löschvorgang fehlgeschlagen!</div>';
-			setcookie("deletesuccess","");
-		}
-	}
+				$sql = $db->query ("SELECT `customerName`, `contactLastName`, `contactFirstName`, `postalCode`, `city` FROM `customers`");
+				$temp = $sql->fetchAll(PDO::FETCH_ASSOC);
 
 
-	if (isset($_GET['edit'])) {
-		$editid = $_GET['edit'];
-		setcookie("idid",$editid);
+			
 
-		$sql= "SELECT name, description, createDate FROM project WHERE id = $editid";
-		$res = $db->query($sql);
-		$projectdata=$res->fetch(\PDO::FETCH_ASSOC);
-	}
+			    $startval;
+			    $addval=20;
+			    if(isset($_GET['page']))
+			    {
+			    	$startval=$_GET['page']*20;
+			    }	
+			    else  
+			    {
+			    	$startval=0;
+			    }
+			    $res=$db->query ( "SELECT customerName, contactLastName, contactFirstName, postalCode, city FROM customers LIMIT $startval,$addval" );
+			    $tmp=$res->fetchAll(PDO::FETCH_OBJ);
+			?>
 
+			<table class="table table-hover table-bordered">
+				<thead>
+				  <tr>
+			        <th>Firma</th>
+			        <th>Nachname</th>
+			        <th>Vorname</th>
+			        <th>PLZ</th>
+			        <th>Ort</th>
+				  </tr>
+				</thead>
 
-	if (isset($_GET['submitbtn'])) {
-		$pid=$_COOKIE['idid'];
-		$sql = "UPDATE project SET name=:name, description=:description, createDate=:createDate WHERE id=$pid";
-		$stmt = $db->prepare($sql);
-			$stmt->bindParam(':name', $_GET['name'], PDO::PARAM_STR); 
-			$stmt->bindParam(':description', $_GET['description'], PDO::PARAM_STR);
-			$stmt->bindParam(':createDate', $_GET['createDate'], PDO::PARAM_STR);
-		$stmt->execute();
-		setcookie("idid","");
-		header("Location:".$_SERVER['PHP_SELF']);   
-	}
+				<tbody>
+				<?php
+					foreach ($tmp as $row) 
+					{
+						?>
+							<tr>
+								<td><?php echo $row->customerName;?></td>
+					            <td><?php echo $row->contactLastName;?></td>
+					            <td><?php echo $row->contactFirstName;?></td>
+					            <td><?php echo $row->postalCode;?></td>
+								<td><?php echo $row->city;?></td>
+							</tr>
+						<?php
+					}
+				?>
+				</tbody>
+			</table>
 
-	if (isset($_GET['closebtn'])) {
-		setcookie("idid","");
-		header("Location:".$_SERVER['PHP_SELF']); 
-	}
+			<div class = "nav" style="text-align: center;">
+				<nav aria-label="Page navigation">
+			        <ul class="pagination">
+			            <li>
+			                <a href="index.php?page=0" aria-label="First">
+			                	<span aria-hidden="true">&laquo;</span>
+			                </a>
+			            </li>
 
-	*/
-?>
+			            <li>
+			                <?php
+			                if(isset($_GET['page']))
+			                { 
+			                	if(($_GET['page'])!=0) 
+			                	{
+				                    echo '<a href="index.php?page='.(($_GET['page'])-1).'" aria-label="Previous">';
+				                    echo '<span aria-hidden="true">&lt;</span>';
+				                    echo '</a>'; 
+				                }
+				                if(($_GET['page'])==0)
+				                {
+				                    echo '<a href="index.php?page=0" aria-label="Previous">';
+				                    echo '<span aria-hidden="true">&lt;</span>';
+				                    echo '</a>'; 
+				                }
+			                }
+			                else 
+			                {
+			                    echo '<a href="index.php?page=0" aria-label="Previous">'; ?>
+			                        <span aria-hidden="true">&lt;</span>
+			                    </a>
+			                <?php 
+			            	}
+			                ?>
+				        </li>
 
+				        <?php
+				            $countselect=$db->query ( "SELECT COUNT(customerNumber) FROM customers" );
+				            $tmp=$countselect->fetchColumn();
+				            $numpages=$tmp/20;
+				            $numpages=intval($numpages);
 
+				            for($i=0;$i<$numpages+1;$i++)
+				            {
+				                $active=false;
+				                $displaynum=$i+1;
+				                if(isset($_GET['page']))
+				                {
+				                    if($i==$_GET['page'])
+				                    {
+				                        $active=true;
+				                    }
+				                }
+				                if($active==false)
+				                {
+				                    echo '<li><a href="index.php?page='.$i.'">'.$displaynum.'</a></li>';
+				                }
+				                else
+				                {
+				                    echo '<li class="active"><a href="index.php?page='.$i.'">'.$displaynum.'</a></li>';
+				                }
+				                $lapage=$i;
+				            }
+				            ?>
 
+				            <li>
+				                <?php
+				                if(isset($_GET['page']))
+				                { 
+				                	if($_GET['page']!=$lapage)
+				                	{
+				                    echo '<a href="index.php?page='.(($_GET['page'])+1).'" aria-label="Next">';
+				                    echo '<span aria-hidden="true">&gt;</span>';
+				                    echo '</a>';
+				                	}
+					                if($_GET['page']==$lapage)
+					                {
+					                    echo '<a href="index.php?page='.$_GET['page'].'" aria-label="Next">';
+					                    echo '<span aria-hidden="true">&gt;</span>';
+					                    echo '</a>';
+					                }
+					            }
+				                else 
+				                {
+				                    echo '<a href="index.php?page=1" aria-label="Next">'; ?>
+				                        <span aria-hidden="true">&gt;</span>
+				                    </a>
+				                <?php 
+				            	}
+				                ?>
+				            </li>
 
-
-<?php
-
-try {
-
-    // Find out how many items are in the table
-    $total = $db->query('
-        SELECT
-            COUNT(*)
-        FROM
-            customers
-    ')->fetchColumn();
-
-    // How many items to list per page
-    $limit = 10;
-
-    // How many pages will there be
-    $pages = ceil($total / $limit);
-
-    // What page are we currently on?
-    $page = min($pages, filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, array(
-        'options' => array(
-            'default'   => 1,
-            'min_range' => 1,
-        ),
-    )));
-
-    // Calculate the offset for the query
-    $offset = ($page - 1)  * $limit;
-
-    // Some information to display to the user
-    $start = $offset + 1;
-    $end = min(($offset + $limit), $total);
-
-    // The "back" link
-    $prevlink = ($page > 1) ? '<a href="?page=1" title="First page"><span class="glyphicon glyphicon-backward"></span></a> <a href="?page=' . ($page - 1) . '" title="Previous page"><span class="glyphicon glyphicon-triangle-left"></span></a>' : '<span class="disabled"><span class="glyphicon glyphicon-backward"></span></span> <span class="disabled"><span class="glyphicon glyphicon-triangle-left"></span></span>';
-
-    // The "forward" link
-    $nextlink = ($page < $pages) ? '<a href="?page=' . ($page + 1) . '" title="Next page"><span class="glyphicon glyphicon-triangle-right"></span></a> <a href="?page=' . $pages . '" title="Last page"><span class="glyphicon glyphicon-forward"></span></a>' : '<span class="disabled"><span class="glyphicon glyphicon-forward"></span></span> <span class="disabled"><span class="glyphicon glyphicon-triangle-right"></span></span>';
-
-    
-    // Prepare the paged query
-    $stmt = $db->prepare('
-        SELECT
-            *
-        FROM
-            customers
-        ORDER BY
-            customerName
-        LIMIT
-            :limit
-        OFFSET
-            :offset
-    ');
-
-    // Bind the query params
-    $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-    $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-    $stmt->execute();
-
-    // Do we have any results?
-    if ($stmt->rowCount() > 0) {
-        // Define how we want to fetch the results
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $iterator = new IteratorIterator($stmt);
-
-?>
-
-
-
-
-
-<div class="container">
-<h1>Kundenübersicht</h1>
-<table class="table table-hover table-bordered">
-	<thead>
-	  <tr>
-        <th>Firma</th>
-        <th>Nachname</th>
-        <th>Vorname</th>
-        <th>PLZ</th>
-        <th>Ort</th>
-	  </tr>
-	</thead>
-	<tbody>
-	<?php
-		foreach ($iterator as $row) { ?>
-			<tr>
-				<td><?php echo htmlspecialchars($row['customerName']);?></td>
-				<td><?php echo htmlspecialchars($row['contactLastName']);?></td>
-				<td><?php echo htmlspecialchars($row['contactFirstName']);?></td>
-				<td><?php echo htmlspecialchars($row['postalCode']);?></td>
-				<td><?php echo htmlspecialchars($row['city']);?></td>
-			</tr>
-	<?php } ?>
-	</tbody>
-</table>
-
-</div>
-
-<?php
-
-// Display the paging information
-echo '<div id="paging" class="container" style="text-align: center"><p>', $prevlink, $page, $nextlink, ' </p></div>';
-
-
-} else {
-        echo '<p>No results could be displayed.</p>';
-    }
-
-} catch (Exception $e) {
-    echo '<p>', $e->getMessage(), '</p>';
-}
-?>
-
-</body>
+				            <li>
+				                <?php echo '<a href="index.php?page='.$lapage.'" aria-label="Last">'; ?>
+				                    <span aria-hidden="true">&raquo;</span>
+				                </a>
+				            </li>
+			        </ul>
+				</nav>
+			</div>
+		</div>
+	</body>
 </html>
