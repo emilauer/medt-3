@@ -24,6 +24,13 @@
 		text-decoration: none;
 
 	}
+	.btn {
+		background-color: #fff;
+		border: 1px solid #ddd;
+	}
+	.btn:hover {
+		background-color: #f2f2f2;
+	}
 </style>
 
 
@@ -39,12 +46,12 @@
 	try{
 		$db=new PDO ( "mysql:host=$host;dbname=$dbname", $user, $pwd);
 	}catch(PDOException $e){
-		exit("<h2 class=\"bg-danger\">System nicht verfügbar!</h2>");
+		exit("<h2 class=\"bg-danger\">System nicht verfügbar!<br><br>$e</h2>");
 	}
 	
 
 	//PDOStatement
-	$res = $db->query ("SELECT * FROM project");
+	$res = $db->query("SELECT * FROM project");
 	//Array
 	$temp = $res->fetchAll(PDO::FETCH_ASSOC);
 	
@@ -52,11 +59,24 @@
 	if (isset($_GET['delete'])) {
 		$deleteid=$_GET['delete'];
 		$sql = "DELETE FROM project WHERE id=$deleteid";
-		try{
-			echo "<div class=\"alert alert-success\" role=\"alert\">Erfolgreich</div>";
+		$res = $db->query($sql);
+		header("Location:".$_SERVER['PHP_SELF']);
+		if ($res->rowCount()) {
+			setcookie("deletesuccess",true);
 		}
-		catch{
-			echo "<div class=\"alert alert-success\" role=\"alert\">Nicht erfolgreich</div>";
+		else {
+			setcookie("deletesuccess",false);
+		} 
+	}
+
+	if (isset($_COOKIE['deletesuccess'])) {
+		if ($_COOKIE['deletesuccess'] == true) {
+			echo '<div class="alert alert-success" role="alert">Löschvorgang erfolgreich!</div>';
+			setcookie("deletesuccess","");
+		}
+		else {
+			echo '<div class="alert alert-success" role="alert">Löschvorgang fehlgeschlagen!</div>';
+			setcookie("deletesuccess","");
 		}
 	}
 
@@ -66,15 +86,12 @@
 		setcookie("idid",$editid);
 
 		$sql= "SELECT name, description, createDate FROM project WHERE id = $editid";
-		$db->query($sql);
-		$projectdata=$sql->fetch(\PDO::FETCH_ASSOC);
+		$res = $db->query($sql);
+		$projectdata=$res->fetch(\PDO::FETCH_ASSOC);
 	}
 
 
-	if (isset($_GET['submitbtn'])) {
-		$pname=$_GET['name'];
-		$pdescription=$_GET['description'];
-		$pdate=$_GET['createDate'];
+	if (isset($_GET['updatebtn'])) {
 		$pid=$_COOKIE['idid'];
 		$sql = "UPDATE project SET name=:name, description=:description, createDate=:createDate WHERE id=$pid";
 		$stmt = $db->prepare($sql);
@@ -82,18 +99,36 @@
 			$stmt->bindParam(':description', $_GET['description'], PDO::PARAM_STR);
 			$stmt->bindParam(':createDate', $_GET['createDate'], PDO::PARAM_STR);
 		$stmt->execute();
+		setcookie("idid","");
 		header("Location:".$_SERVER['PHP_SELF']);   
 	}
 
+	if (isset($_GET['createbtn'])) {
+		$sql = "INSERT INTO project (name, description, createDate) VALUES (:newname, :newdescription, :newcreateDate)";
+		$stmt = $db->prepare($sql);
+			$stmt->bindParam(':newname', $_GET['name'], PDO::PARAM_STR); 
+			$stmt->bindParam(':newdescription', $_GET['description'], PDO::PARAM_STR);
+			$stmt->bindParam(':newcreateDate', $_GET['createDate'], PDO::PARAM_STR);
+		$stmt->execute();
+		setcookie("createsuccess",true);
+		header("Location:".$_SERVER['PHP_SELF']);
+	}
+
+	if (isset($_COOKIE['createsuccess'])) {
+		echo '<div class="alert alert-success" role="alert">Projekt wurde erstellt</div>'; 
+		setcookie("createsuccess","");
+	}
+
 	if (isset($_GET['closebtn'])) {
+		setcookie("idid","");
 		header("Location:".$_SERVER['PHP_SELF']); 
 	}
 ?>
 <div class="container" style="float:left;">
 <h1>Projektübersicht</h1>
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered" style="margin-bottom: 10px;">
 	<thead>
-	  <tr>
+	  <tr style="background-color: #000; color: #fff;">
         <th>Name</th>
         <th>Beschreibung</th>
         <th>Datum</th>
@@ -104,9 +139,9 @@
 	<?php
 		foreach ($temp as $row) { ?>
 			<tr>
-				<td><?php echo $row['name'];?></td>
-				<td><?php echo $row['description'];?></td>
-				<td><?php echo $row['createDate'];?></td>
+				<td><?php echo htmlspecialchars($row['name']);?></td>
+				<td><?php echo htmlspecialchars($row['description']);?></td>
+				<td><?php echo htmlspecialchars($row['createDate']);?></td>
                 <td>
                 	<a href="dbAccess.php?edit=<?php echo $row['id']; ?>&modal=open"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
                     <a href="dbAccess.php?delete=<?php echo $row['id']; ?>"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
@@ -115,6 +150,21 @@
 	<?php } ?>
 	</tbody>
 </table>
+<a href="dbAccess.php?new=true"><button type="button" class="btn" aria-label="Left Align">
+  <span class="glyphicon glyphicon-plus" aria-hidden="true" style="margin:0px;"></span>
+</button></a>
+
+<?php  
+if (isset($_GET['edit'])) {
+	$name=$projectdata['name'];
+	$description=$projectdata['description'];
+	$date=$projectdata['createDate'];
+ } else {
+ 	$name="";
+ 	$description="";
+ 	$date="";
+ }
+?>
 
 <div id="myModal" class="modal fade myModal" role="dialog">
   <div class="modal-dialog">
@@ -126,29 +176,46 @@
         	<button type="submit" class="close" name="closebtn" value="close">&times;</button>
         </form>
         <h4 class="modal-title">
-        	Projekt 
-        	<?php  
-        		print_r($projectdata['name']);
-        	?>
-        	bearbeiten
+        	<?php
+        		if (isset($_GET['edit'])) {
+        		  	echo "Projekt "; 
+		        	print_r($projectdata['name']);
+		        	echo " bearbeiten";
+        		} else {
+        			echo "Neues Projekt";
+        		}
+	        ?>
         </h4>
       </div>
       <div class="modal-body">
         <form>
         	<div class="form-group">
         		<label class="control-label">Name</label>
-        		<input type="text" class="form-control" name="name" value="<?php print_r($projectdata['name']); ?>">
+        		<?php
+        			 echo '<input type="text" class="form-control" name="name" value="'.$name.'">';
+        		?>
         	</div>
         	<div class="form-group">
         		<label class="control-label">Beschreibung</label>
-        		<input type="text" class="form-control" name="description" value="<?php print_r($projectdata['description']); ?>">
+        		<?php
+        			 echo '<input type="text" class="form-control" name="description" value="'.$description.'">';
+        		?>
         	</div>
         	<div class="form-group">
         		<label class="control-label">Datum</label>
-        		<input type="text" class="form-control" name="createDate" value="<?php print_r($projectdata['createDate']); ?>">
+        		<?php
+        			 echo '<input type="text" class="form-control" name="createDate" value="'.$date.'">';
+        		?>
         	</div>
         	<div style="float:right;">
-        	<button type="submit" class="btn btn-default" name="submitbtn" value="confirm">Aktualisieren</button>
+        	<?php  
+        		if (isset($_GET['edit'])) {
+        			echo '<button type="submit" class="btn btn-default" name="updatebtn" value="confirm">Aktualisieren</button>';
+        		}
+        		else {
+        			echo '<button type="submit" class="btn btn-default" name="createbtn" value="confirm">Erstellen</button>';
+        		}
+        	?>
         	<button type="submit" class="btn btn-default" name="closebtn" value="close">Abbrechen</button>
         	</div>
         	<div style="clear:both;"></div>
@@ -159,12 +226,13 @@
 
 <?php  
 
-if (isset($_GET['modal'])) {
+if (isset($_GET['modal']) || isset($_GET['new'])) {
 	echo "<script>$(\"#myModal\").modal('show')</script>";
 }
 
 ?>
 
+</div>
 </div>
 </body>
 </html>
