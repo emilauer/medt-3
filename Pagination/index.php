@@ -10,46 +10,54 @@
 	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	</head>
 
+
+
+		<?php
+
+			$host = 'localhost';
+			$database = 'classicmodels';
+			$user ='htluser';
+			$pwd = 'htluser';
+
+			try
+			{
+				$db = new PDO ("mysql:host=$host;dbname=$database", $user, $pwd);
+			}catch(PDOException $e){
+				exit("<h3 class=\"bg-danger\">System nicht verfügbar!</h3>");
+			}
+
+			$db->query("SET NAMES 'utf8'");
+
+			$sql = $db->query ("SELECT `customerName`, `contactLastName`, `contactFirstName`, `postalCode`, `city` FROM `customers`");
+			$temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+
+		
+
+		    $startval;
+		    $addval=20;
+		    if(isset($_GET['page']))
+		    {
+		    	$startval=$_GET['page']*20;
+		    }	
+		    else  
+		    {
+		    	$startval=0;
+		    }
+		    $res=$db->query ( "SELECT customerName, contactLastName, contactFirstName, postalCode, city FROM customers LIMIT $startval,$addval" );
+		    $tmp=$res->fetchAll(PDO::FETCH_OBJ);
+		?>
+
+
+
+
+
+
 	<body>
-		<div class = "container">
+		<div class = "container" style="float:left">
 		<h2>Kundenübersicht</h2>
-			<?php
 
-				$host = 'localhost';
-				$database = 'classicmodels';
-				$user ='htluser';
-				$pwd = 'htluser';
-
-				try
-				{
-					$db = new PDO ("mysql:host=$host;dbname=$database", $user, $pwd);
-				}catch(PDOException $e){
-					exit("<h3 class=\"bg-danger\">Nicht verfügbar!</h3>");
-				}
-
-				$db->query("SET NAMES 'utf8'");
-
-				$sql = $db->query ("SELECT `customerName`, `contactLastName`, `contactFirstName`, `postalCode`, `city` FROM `customers`");
-				$temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-
-
-			
-
-			    $startval;
-			    $addval=20;
-			    if(isset($_GET['page']))
-			    {
-			    	$startval=$_GET['page']*20;
-			    }	
-			    else  
-			    {
-			    	$startval=0;
-			    }
-			    $res=$db->query ( "SELECT customerName, contactLastName, contactFirstName, postalCode, city FROM customers LIMIT $startval,$addval" );
-			    $tmp=$res->fetchAll(PDO::FETCH_OBJ);
-			?>
-
-			<table class="table table-hover table-bordered">
+			<table class="table table-hover table-striped table-bordered">
 				<thead>
 				  <tr>
 			        <th>Firma</th>
@@ -78,7 +86,7 @@
 				</tbody>
 			</table>
 
-			<div class = "nav" style="text-align: center;">
+			<div class = "nav" style="text-align: center; float:left;">
 				<nav aria-label="Page navigation">
 			        <ul class="pagination">
 			            <li>
