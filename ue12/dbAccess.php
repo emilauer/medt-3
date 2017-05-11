@@ -1,6 +1,6 @@
 <?php  
-	require ("IsLoggedIn.php")
-	
+	include ("db.php");
+	require ("IsLoggedIn.php");
 ?>
 
 <!DOCTYPE html>
@@ -42,19 +42,7 @@
 </head>
 <body>
 <?php 
-	$host='localhost';
-	$dbname='medt3';
-	$user='htluser';
-	$pwd='htluser';
 	
-
-	try{
-		$db=new PDO ( "mysql:host=$host;dbname=$dbname", $user, $pwd);
-	}catch(PDOException $e){
-		exit("<h2 class=\"bg-danger\">System nicht verfügbar!<br><br>$e</h2>");
-	}
-	
-
 	//PDOStatement
 	$res = $db->query("SELECT * FROM project");
 	//Array
@@ -184,7 +172,7 @@
 
 <div class="container" style="float:left;">
 <?php  
-	if ($session_check == true) {
+	if ($_SESSION["check"] == true) {
 		echo "<h2>Willkommen ".$_SESSION['session_user']."</h2>";
 	}
 ?>

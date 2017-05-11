@@ -4,9 +4,16 @@
 		$p = $_POST['pwd'];
 		session_start();
 		$_SESSION["session_user"] = $u;
-		$_SESSION["session_pwd"] = $p;
+		$_SESSION["session_pwd"] = $p;	
+		$_SESSION["check"] = false;
 		header("Location: http://localhost/medt/ue12/dbAccess.php");
 	}
+
+	if (isset($_GET["check"])) {
+		echo "<script>alert('User und Passwort stimmen nicht überein');</script>";
+	}
+
+	
 ?>
 
 <!DOCTYPE html>
